@@ -7,5 +7,6 @@
 - 배포 : Github Pages (Settings → Pages → Branch : 'main', Folder : '/root')
 
 ## 폴더
+- 'index.html'          #기본 코드
 - 'assets/css/app.css' - 스타일
 - 'assets/js/app.js' - 스크립트
