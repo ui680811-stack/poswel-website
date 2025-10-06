@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>안전보건 대시보드 | 안전행정섹션</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="./assets/css/app.css" />
+</head>
+<body>
+  <!-- 로그인 레이어 -->
+  <div id="login-layer">
+    <div class="login-box">
+      <h2>로그인</h2>
+      <div class="login-desc">접속을 위해 아이디와 비밀번호를 입력하세요.</div>
+      <div class="form">
+        <input id="id" class="input" placeholder="아이디" autocomplete="off" />
+        <input id="pw" class="input" type="password" placeholder="비밀번호" autocomplete="off" />
+        <button id="login" class="btn-primary">로그인</button>
+        <div id="err" class="error">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 앱 -->
+  <div class="app" id="app" style="display:none">
+    <div class="topbar">
+      <div class="tb-left">
+        <div class="logo">S</div>
+        <div class="tb-title">안전보건관리체계 포털</div>
+      </div>
+      <div class="tb-right">
+        <div class="welcome">'이단우' 님 환영합니다.</div>
+        <button class="logout" id="btn-logout">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- 사이드바 -->
+    <aside class="sidebar">
+      <div class="nav-item active" data-page="home" title="메인"><div class="nav-ico">🏠</div><div class="nav-t">메인</div></div>
+      <div class="nav-item" data-page="biz" title="사업장 관리"><div class="nav-ico">🏭</div><div class="nav-t">사업장 관리</div></div>
+      <div class="nav-item" data-page="work" title="작업관리"><div class="nav-ico">🛠️</div><div class="nav-t">작업관리</div></div>
+      <div class="nav-item" data-page="law" title="산업안전보건법"><div class="nav-ico">📚</div><div class="nav-t">법령</div></div>
+      <div class="nav-item" data-page="counsel" title="소통게시판"><div class="nav-ico">💬</div><div class="nav-t">소통게시판</div></div>
+      <div class="nav-item" data-page="report" title="컨설팅 보고서"><div class="nav-ico">📄</div><div class="nav-t">보고서</div></div>
+      <div class="nav-item" data-page="data" title="안전사고 통계"><div class="nav-ico">📊</div><div class="nav-t">데이터</div></div>
+    </aside>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main">
+      <!-- ===== Home ===== -->
+      <section class="page active" id="page-home">
+        <section class="hero"><h1>안전의 시작은 "현장"</h1></section>
+        <div class="grid">
+          <div class="card">
+            <h3>사업장 안전보건관리체계</h3>
+            <div class="pill">기본 안전보건관리체계 구축 진행</div>
+            <div class="progress-wrap" style="margin-top:14px">
+              <svg width="160" height="160" viewBox="0 0 120 120" aria-label="진행률 62.5%">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#eef2ff" stroke-width="14"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--brand)" stroke-width="14" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="calc(314 - 314*0.625)"/>
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="18" fill="#334155">62.5%</text>
+              </svg>
+              <div class="kpis">
+                <div class="kpi warn link" data-link="조직"><span class="dot" style="background:var(--warn)"></span><span class="name">안전보건관리 조직</span><span class="status">등록 필요</span></div>
+                <div class="kpi ok link" data-link="경영방침"><span class="dot" style="background:var(--ok)"></span><span class="name">안전보건 경영방침</span><span class="status">완료</span></div>
+                <div class="kpi ok link" data-link="목표"><span class="dot" style="background:var(--ok)"></span><span class="name">안전보건 목표</span><span class="status">완료</span></div>
+                <div class="kpi warn link" data-link="위원회"><span class="dot" style="background:var(--warn)"></span><span class="name">산업안전보건위원회</span><span class="status">미등록</span></div>
+                <div class="kpi link" data-link="예산"><span class="dot" style="background:#60a5fa"></span><span class="name">안전보건 예산 편성</span><span class="status">등록</span></div>
+                <div class="kpi ok link" data-link="관련조치"><span class="dot" style="background:var(--ok)"></span><span class="name">안전보건 관련조치</span><span class="status">완료</span></div>
+              </div>
+              <div class="tiles">
+                <div class="tile link" data-link="문서함">📂 결재해야 하는 문서</div>
+                <div class="tile link" data-link="도움업무">🧰 요청받은 도움 업무</div>
+              </div>
+              <div class="note">각 항목을 클릭하면 관련 페이지로 이동합니다.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="cal-header"><strong>일정</strong><div><button class="btn-sm" id="btn-today">오늘</button><button class="btn-sm" id="btn-add">+ 일정 등록하기</button></div></div>
+            <div style="font-size:12px;color:#475569;margin-bottom:6px" id="cal-month"></div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Biz (프로필형) ===== -->
+      <section id="page-biz" class="page">
+        <div class="biz-header card">
+          <div class="biz-cover"></div>
+          <div class="biz-row">
+            <div class="biz-avatar">IMG</div>
+            <div class="biz-title">
+              <div class="name">포스웰 <span class="no">[10018210]</span></div>
+              <div class="muted">법인명(단체명): 제철복지회</div>
+            </div>
+            <div class="biz-actions">
+              <button class="btn">스마트 보고서 인증 현황</button>
+              <button class="btn">사업장 설정</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="biz-grid">
+          <div class="card"><h3>기본 정보</h3>
+            <div class="info-list">
+              <div class="info-row"><div class="icon">👤</div><div><strong>대표</strong> 김상락</div></div>
+              <div class="info-row"><div class="icon">👥</div><div><strong>근로자수</strong> 100명</div></div>
+              <div class="info-row"><div class="icon">📞</div><div>054-221-9145</div></div>
+              <div class="info-row"><div class="icon">📠</div><div>054-221-9199</div></div>
+              <div class="info-row"><div class="icon">📍</div><div>경상북도 포항시 남구 행복길 21(대잠동) 포스웰</div></div>
+              <div class="info-row"><div class="icon">🧾</div><div>사업자등록번호 506-82-02496 <a href="#" class="muted">(통신판매업)</a></div></div>
+            </div>
+          </div>
+          <div class="card"><h3>분류 정보</h3>
+            <div class="info-list">
+              <div class="info-row"><div class="icon">🏷️</div><div><strong>한국표준산업분류</strong><br>55909 | 그 외 기타 숙박업</div></div>
+              <div class="info-row"><div class="icon">🏷️</div><div><strong>산업재해보상보험업무</strong><br>910 | 도소매·음식·숙박업</div></div>
+              <div class="info-row"><div class="icon">📄</div><div><strong>관할 지자체/고용노동부</strong><br>포항시청</div></div>
+              <div class="info-row"><div class="icon">🏢</div><div><strong>관할 대한산업안전협회</strong><br>포항지회</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section card">
+          <div class="section-head">
+            <strong>부서 및 근로자 정보</strong>
+            <button id="openEmpPanel" class="btn-sm">부서 및 근로자 정보 보기 〉</button>
+          </div>
+
+          <!-- 근로자 패널 -->
+          <div id="empPanel" class="emp-wrap" style="display:none">
+            <div class="section-head">
+              <h3 style="margin:0">근로자 정보 추가</h3>
+              <div class="emp-bar">
+                <button id="selDeleteBtn" class="btn-danger">선택삭제</button>
+              </div>
+            </div>
+            <div class="emp-inputs" style="margin-bottom:8px">
+              <input id="empNo" placeholder="직번(6자리 숫자)" />
+              <input id="empName" placeholder="이름(2~4자)" />
+              <select id="empDept">
+                <option value="">부서 선택</option>
+                <option>경영지원그룹</option>
+                <option>안전행정섹션</option>
+                <option>재무기획섹션</option>
+                <option>CS사업그룹</option>
+                <option>FS사업그룹</option>
+              </select>
+              <input id="empRank" placeholder="직급(한글만)" />
+              <button id="addEmpBtn" class="btn-pri">추가</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:44px"><input type="checkbox" id="checkAll" /></th>
+                    <th>직번</th>
+                    <th>이름</th>
+                    <th>부서</th>
+                    <th>직급</th>
+                  </tr>
+                </thead>
+                <tbody id="empTbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /근로자 패널 -->
+        </div>
+      </section>
+
+      <!-- ===== 작업관리 ===== -->
+      <section id="page-work" class="page">
+        <div class="card">
+          <h3>작업관리</h3>
+          <p class="muted" style="margin:8px 0 12px">작업/공정, 허가서 등을 관리합니다.</p>
+          <div class="work-list" id="workList">
+            <div class="work-item" data-work="TBM">1. TBM</div>
+            <div class="work-item" data-work="위험성평가">2. 위험성평가</div>
+            <div class="work-item" data-work="안전보건교육">3. 안전보건교육</div>
+            <div class="work-item" data-work="MSDS">4. MSDS</div>
+            <div class="work-item" data-work="작업표준서">5. 작업표준서</div>
+            <div class="work-item" data-work="외주업체 작업">6. 외주업체 작업</div>
+          </div>
+          <div class="note" id="workHint" style="margin-top:10px">항목을 클릭하면 새 창에서 첨부·열람 페이지가 열립니다.</div>
+        </div>
+      </section>
+
+      <!-- ===== 법령 ===== -->
+      <section id="page-law" class="page">
+        <div class="card">
+          <h3>법령 링크</h3>
+          <div class="law-list">
+            <a href="https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%A4%91%EB%8C%80%EC%9E%AC%ED%95%B4%EC%B2%98%EB%B2%8C%EB%B2%95" target="_blank" rel="noopener">1. 중대재해 처벌법</a>
+            <a href="https://www.law.go.kr/LSW//lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&eventGubun=060101&query=%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95#liBgcolor2" target="_blank" rel="noopener">2. 산업안전보건법</a>
+            <a href="https://law.go.kr/LSW//lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&eventGubun=060101&query=%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95+%EC%8B%9C%ED%96%89%EB%A0%B9#undefined" target="_blank" rel="noopener">3. 산업안전보건법 시행령</a>
+            <a href="https://law.go.kr/LSW//lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&eventGubun=060101&query=%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95+%EC%8B%9C%ED%96%89%EB%A0%B9#undefined" target="_blank" rel="noopener">4. 산업안전보건법 시행규칙</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 소통게시판 ===== -->
+      <section id="page-counsel" class="page">
+        <div class="card">
+          <h3>소통게시판</h3>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button id="toggleWriter" class="btn-sm">글작성</button>
+          </div>
+          <div class="section" style="margin-top:12px">
+            <div class="board-wrap">
+              <div class="board-form" id="boardForm" style="display:none">
+                <input id="postTitle" placeholder="제목" />
+                <textarea id="postBody" rows="4" placeholder="본문"></textarea>
+                <input id="postPw" type="password" placeholder="개인 비밀번호 (수정·삭제에 필요)" />
+                <button id="postCreate" class="btn-pri" style="width:120px">등록</button>
+              </div>
+
+              <div class="board-list" id="boardList">
+                <div class="board-row header"><div>제목</div><div>작성일</div><div style="text-align:right">동작</div></div>
+                <!-- rows here -->
+              </div>
+
+              <div id="boardDetail" class="card" style="display:none">
+                <h3 id="detailTitle">제목</h3>
+                <p id="detailMeta" class="muted" style="margin-top:4px">익명 · <span id="detailDate"></span></p>
+                <div id="detailBody" style="white-space:pre-wrap;margin-top:10px"></div>
+                <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px">
+                  <button id="btnEdit" class="btn-sm">수정</button>
+                  <button id="btnDelete" class="btn-danger btn-sm">삭제</button>
+                  <button id="btnBack" class="btn-sm">목록</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 기타 ===== -->
+      <section id="page-report" class="page"><div class="card"><h3>컨설팅 보고서</h3><p>보고서 업로드/다운로드.</p></div></section>
+
+      <!-- ===== 안전사고 통계 ===== -->
+      <section id="page-data" class="page">
+        <div class="card">
+          <h3>안전사고 통계</h3>
+          <p class="muted" style="margin:8px 0 12px">사고 데이터를 입력·열람합니다.</p>
+          <div class="table-wrap" style="margin-bottom:10px">
+            <table>
+              <thead>
+                <tr>
+                  <th>번호</th>
+                  <th>일시</th>
+                  <th>지역</th>
+                  <th>사업장</th>
+                  <th>사번</th>
+                  <th>이름</th>
+                  <th>재해 유형</th>
+                  <th>사고 내용</th>
+                  <th>조치 결과</th>
+                  <th>요양 기간</th>
+                  <th>증빙자료</th>
+                </tr>
+              </thead>
+              <tbody id="accBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card" style="margin-top:10px">
+            <h3 style="margin-top:0">신규 입력</h3>
+            <div class="emp-inputs">
+              <input id="accDate" placeholder="일시 (예: 2025-09-15 14:30)"/>
+              <input id="accRegion" placeholder="지역"/>
+              <input id="accBiz" placeholder="사업장"/>
+              <input id="accNo" placeholder="사번"/>
+              <input id="accName" placeholder="이름"/>
+              <input id="accType" placeholder="재해 유형"/>
+              <input id="accDesc" placeholder="사고 내용"/>
+              <input id="accAction" placeholder="조치 결과"/>
+              <input id="accDays" placeholder="요양 기간(일)"/>
+              <input id="accProof" type="file" accept=".pdf,.jpg,.png" multiple style="display:none"/>
+              <button id="accProofBtn" class="btn-sm">증빙자료</button>
+              <button id="accAdd" class="btn-pri">추가</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 모듈 엔트리 -->
+  <script type="module" src="./assets/js/main.js"></script>
+</body>
+</html>
