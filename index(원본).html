@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>안전보건 대시보드 | 안전행정섹션</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+      --brand:#2f6ae0; --brand-100:#e7efff; --sidebar:#0f172a; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444; --radius:16px;
+    }
+
+    /* ===== 폰트: 업로드한 NanumGothic 사용 ===== */
+    @font-face{
+      font-family:'NanumGothic';
+      src: local('NanumGothic'), url('NanumGothic.otf') format('opentype');
+      font-weight: 300 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"NanumGothic","Malgun Gothic","Apple SD Gothic Neo",system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+
+    /* ===== 로그인 레이어 ===== */
+    #login-layer{position:fixed;inset:0;background:linear-gradient(135deg,#eff6ff,#f8fafc);display:flex;align-items:center;justify-content:center;z-index:1000}
+    .login-box{width:360px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 8px 30px rgba(15,23,42,.08)}
+    .login-box h2{margin:0 0 10px 0;font-size:20px}
+    .login-desc{font-size:12px;color:#64748b;margin-bottom:14px}
+    .form{display:flex;flex-direction:column;gap:10px}
+    .input{border:1px solid var(--line);border-radius:12px;padding:10px}
+    .btn-primary{background:var(--brand);color:#fff;border:none;border-radius:12px;padding:10px;cursor:pointer}
+    .error{display:none;color:#ef4444;font-size:12px;text-align:center;margin-top:6px}
+
+    /* ===== 앱 레이아웃 ===== */
+    .app{display:grid;grid-template-columns:80px 1fr;grid-template-rows:60px 1fr;height:100vh}
+    .topbar{grid-column:1/3;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+    .tb-left{display:flex;gap:10px;align-items:center}
+    .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    .tb-title{font-weight:700}
+    .tb-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+    .welcome{font-size:12px;color:#475569;line-height:1}
+    .logout{border:1px solid #1f2937;background:#111827;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;line-height:1;cursor:pointer}
+
+    .sidebar{grid-row:2/3;background:var(--sidebar);color:#e5e7eb;display:flex;flex-direction:column;align-items:center;padding:10px 8px;gap:8px}
+    .nav-item{width:64px;height:64px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#cbd5e1;cursor:pointer;border:1px solid transparent}
+    .nav-item:hover{background:#0b1220;border-color:#1f2937}
+    .nav-item.active{background:#0b1220;color:#fff;border-color:#334155}
+    .nav-ico{font-size:18px}
+    .nav-t{font-size:11px}
+
+    .main{grid-column:2/3;grid-row:2/3;overflow:auto;padding:18px}
+
+    /* ===== 공통 카드 ===== */
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+    .card h3{margin:0 0 12px;font-size:16px}
+
+    /* ===== 메인(Home) ===== */
+    .hero{height:140px;border-radius:var(--radius);background:linear-gradient(120deg,#e9efff,#f8fafc);display:flex;align-items:center;justify-content:center}
+    .hero h1{font-size:26px;letter-spacing:-.3px}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px}
+    .pill{font-size:12px;color:#475569;background:#f1f5f9;border:1px solid var(--line);padding:4px 8px;border-radius:999px}
+    .progress-wrap{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center}
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .kpi{display:flex;align-items:center;gap:8px;border:1px dashed #e5e7eb;padding:8px;border-radius:12px;cursor:pointer}
+    .kpi .dot{width:10px;height:10px;border-radius:50%}
+    .kpi .name{font-size:13px;color:#334155}
+    .kpi .status{margin-left:auto;font-size:12px}
+    .kpi:hover{background:#f8fafc}
+    .kpi.ok .status{color:var(--ok)} .kpi.warn .status{color:var(--warn)}
+    .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+    .tile{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfdff;cursor:pointer}
+    .tile:hover{background:var(--brand-100)}
+    .note{margin-top:12px;font-size:12px;color:var(--muted)}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .cal-grid div{height:34px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#475569}
+    .cal-grid .today{outline:2px solid var(--brand)}
+
+    /* ===== 사업장(Biz) ===== */
+    .biz-header{position:relative;background:#e5e7eb;border-radius:16px;overflow:hidden;margin-bottom:14px}
+    .biz-cover{height:140px;background:linear-gradient(120deg,#dbeafe,#f8fafc)}
+    .biz-row{display:flex;gap:16px;align-items:flex-end;position:relative;margin-top:-40px;padding:0 16px 16px}
+    .biz-avatar{width:96px;height:96px;border-radius:12px;border:4px solid #fff;background:#cbd5e1;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .biz-title{flex:1}
+    .biz-title .name{font-size:22px;font-weight:800}
+    .biz-title .no{font-size:12px;color:#64748b;margin-left:8px}
+    .biz-actions{display:flex;gap:8px}
+    .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .biz-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .info-list{display:grid;gap:10px}
+    .info-row{display:flex;gap:10px;align-items:flex-start}
+    .icon{width:22px;text-align:center;opacity:.75}
+    .muted{color:#64748b;font-size:12px}
+    .section{margin-top:16px}
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .kpi-tile{background:#fbfdff;border:1px solid var(--line);border-radius:12px;padding:12px}
+    .kpi-t{font-size:12px;color:#64748b}
+    .kpi-v{font-size:18px;font-weight:800;margin-top:4px}
+    @media (max-width: 960px){.biz-grid{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+
+    /* ===== 근로자 테이블 ===== */
+    .emp-wrap{margin-top:14px}
+    .emp-bar{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:8px 0}
+    .emp-inputs{display:flex;gap:8px;flex-wrap:wrap}
+    .emp-inputs input, .emp-inputs select{padding:8px;border:1px solid var(--line);border-radius:8px;min-width:120px}
+    .btn-sm{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+    .btn-pri{background:var(--brand);color:#fff;border:none}
+    .btn-danger{background:#ef4444;color:#fff;border:none}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid var(--line);padding:8px;text-align:center;font-size:14px}
+    th{background:#f1f5f9}
+
+    /* 페이지 표시/숨김 */
+    .page{display:none}
+    .page.active{display:block}
+    .link{cursor:pointer}
+
+    /* ===== 작업관리 리스트 ===== */
+    .work-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+    .work-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfdff}
+    .work-item:hover{background:#f8fafc}
+
+    /* ===== 법령 링크 ===== */
+    .law-list{display:grid;gap:8px}
+    .law-list a{display:block;border:1px solid var(--line);padding:10px;border-radius:10px;background:#fbfdff}
+    .law-list a:hover{background:#eef2ff}
+
+    /* ===== 소통게시판 ===== */
+    .board-wrap{display:grid;gap:12px}
+    .board-form{display:grid;gap:8px}
+    .board-form input, .board-form textarea{padding:10px;border:1px solid var(--line);border-radius:10px}
+    .board-list{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .board-row{display:grid;grid-template-columns:1fr 120px 100px;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+    .board-row.header{background:#f1f5f9;font-weight:700}
+    .board-row:last-child{border-bottom:none}
+    .board-actions{display:flex;gap:6px;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <!-- 로그인 레이어 -->
+  <div id="login-layer">
+    <div class="login-box">
+      <h2>로그인</h2>
+      <div class="login-desc">접속을 위해 아이디와 비밀번호를 입력하세요.</div>
+      <div class="form">
+        <input id="id" class="input" placeholder="아이디" autocomplete="off" />
+        <input id="pw" class="input" type="password" placeholder="비밀번호" autocomplete="off" />
+        <button id="login" class="btn-primary">로그인</button>
+        <div id="err" class="error">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 앱 -->
+  <div class="app" id="app" style="display:none">
+    <div class="topbar">
+      <div class="tb-left">
+        <div class="logo">S</div>
+        <div class="tb-title">안전보건관리체계 포털</div>
+      </div>
+      <div class="tb-right">
+        <div class="welcome">'이단우' 님 환영합니다.</div>
+        <button class="logout" id="btn-logout">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- 사이드바 -->
+    <aside class="sidebar">
+      <div class="nav-item active" data-page="home" title="메인"><div class="nav-ico">🏠</div><div class="nav-t">메인</div></div>
+      <div class="nav-item" data-page="biz" title="사업장 관리"><div class="nav-ico">🏭</div><div class="nav-t">사업장 관리</div></div>
+      <div class="nav-item" data-page="work" title="작업관리"><div class="nav-ico">🛠️</div><div class="nav-t">작업관리</div></div>
+      <div class="nav-item" data-page="law" title="산업안전보건법"><div class="nav-ico">📚</div><div class="nav-t">법령</div></div>
+      <div class="nav-item" data-page="counsel" title="소통게시판"><div class="nav-ico">💬</div><div class="nav-t">소통게시판</div></div>
+      <div class="nav-item" data-page="report" title="컨설팅 보고서"><div class="nav-ico">📄</div><div class="nav-t">보고서</div></div>
+      <div class="nav-item" data-page="data" title="안전사고 통계"><div class="nav-ico">📊</div><div class="nav-t">데이터</div></div>
+    </aside>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main">
+      <!-- ===== Home ===== -->
+      <section class="page active" id="page-home">
+        <section class="hero"><h1>안전의 시작은 "현장"</h1></section>
+        <div class="grid">
+          <div class="card">
+            <h3>사업장 안전보건관리체계</h3>
+            <div class="pill">기본 안전보건관리체계 구축 진행</div>
+            <div class="progress-wrap" style="margin-top:14px">
+              <svg width="160" height="160" viewBox="0 0 120 120" aria-label="진행률 62.5%">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#eef2ff" stroke-width="14"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--brand)" stroke-width="14" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="calc(314 - 314*0.625)"/>
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="18" fill="#334155">62.5%</text>
+              </svg>
+              <div class="kpis">
+                <div class="kpi warn link" data-link="조직"><span class="dot" style="background:var(--warn)"></span><span class="name">안전보건관리 조직</span><span class="status">등록 필요</span></div>
+                <div class="kpi ok link" data-link="경영방침"><span class="dot" style="background:var(--ok)"></span><span class="name">안전보건 경영방침</span><span class="status">완료</span></div>
+                <div class="kpi ok link" data-link="목표"><span class="dot" style="background:var(--ok)"></span><span class="name">안전보건 목표</span><span class="status">완료</span></div>
+                <div class="kpi warn link" data-link="위원회"><span class="dot" style="background:var(--warn)"></span><span class="name">산업안전보건위원회</span><span class="status">미등록</span></div>
+                <div class="kpi link" data-link="예산"><span class="dot" style="background:#60a5fa"></span><span class="name">안전보건 예산 편성</span><span class="status">등록</span></div>
+                <div class="kpi ok link" data-link="관련조치"><span class="dot" style="background:var(--ok)"></span><span class="name">안전보건 관련조치</span><span class="status">완료</span></div>
+              </div>
+              <div class="tiles">
+                <div class="tile link" data-link="문서함">📂 결재해야 하는 문서</div>
+                <div class="tile link" data-link="도움업무">🧰 요청받은 도움 업무</div>
+              </div>
+              <div class="note">각 항목을 클릭하면 관련 페이지로 이동합니다.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="cal-header"><strong>일정</strong><div><button class="btn-sm" id="btn-today">오늘</button><button class="btn-sm" id="btn-add">+ 일정 등록하기</button></div></div>
+            <div style="font-size:12px;color:#475569;margin-bottom:6px" id="cal-month"></div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Biz (프로필형) ===== -->
+      <section id="page-biz" class="page">
+        <div class="biz-header card">
+          <div class="biz-cover"></div>
+          <div class="biz-row">
+            <div class="biz-avatar">IMG</div>
+            <div class="biz-title">
+              <div class="name">포스웰 <span class="no">[10018210]</span></div>
+              <div class="muted">법인명(단체명): 제철복지회</div>
+            </div>
+            <div class="biz-actions">
+              <button class="btn">스마트 보고서 인증 현황</button>
+              <button class="btn">사업장 설정</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="biz-grid">
+          <div class="card"><h3>기본 정보</h3>
+            <div class="info-list">
+              <div class="info-row"><div class="icon">👤</div><div><strong>대표</strong> 김상락</div></div>
+              <div class="info-row"><div class="icon">👥</div><div><strong>근로자수</strong> 100명</div></div>
+              <div class="info-row"><div class="icon">📞</div><div>054-221-9145</div></div>
+              <div class="info-row"><div class="icon">📠</div><div>054-221-9199</div></div>
+              <div class="info-row"><div class="icon">📍</div><div>경상북도 포항시 남구 행복길 21(대잠동) 포스웰</div></div>
+              <div class="info-row"><div class="icon">🧾</div><div>사업자등록번호 506-82-02496 <a href="#" class="muted">(통신판매업)</a></div></div>
+            </div>
+          </div>
+          <div class="card"><h3>분류 정보</h3>
+            <div class="info-list">
+              <div class="info-row"><div class="icon">🏷️</div><div><strong>한국표준산업분류</strong><br>55909 | 그 외 기타 숙박업</div></div>
+              <div class="info-row"><div class="icon">🏷️</div><div><strong>산업재해보상보험업무</strong><br>910 | 도소매·음식·숙박업</div></div>
+              <div class="info-row"><div class="icon">📄</div><div><strong>관할 지자체/고용노동부</strong><br>포항시청</div></div>
+              <div class="info-row"><div class="icon">🏢</div><div><strong>관할 대한산업안전협회</strong><br>포항지회</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section card">
+          <div class="section-head">
+            <strong>부서 및 근로자 정보</strong>
+            <button id="openEmpPanel" class="btn-sm">부서 및 근로자 정보 보기 〉</button>
+          </div>
+
+          <!-- 근로자 패널 -->
+          <div id="empPanel" class="emp-wrap" style="display:none">
+            <div class="section-head">
+              <h3 style="margin:0">근로자 정보 추가</h3>
+              <div class="emp-bar">
+                <button id="selDeleteBtn" class="btn-danger">선택삭제</button>
+              </div>
+            </div>
+            <div class="emp-inputs" style="margin-bottom:8px">
+              <input id="empNo" placeholder="직번(6자리 숫자)" />
+              <input id="empName" placeholder="이름(2~4자)" />
+              <select id="empDept">
+                <option value="">부서 선택</option>
+                <option>경영지원그룹</option>
+                <option>안전행정섹션</option>
+                <option>재무기획섹션</option>
+                <option>CS사업그룹</option>
+                <option>FS사업그룹</option>
+              </select>
+              <input id="empRank" placeholder="직급(한글만)" />
+              <button id="addEmpBtn" class="btn-pri">추가</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:44px"><input type="checkbox" id="checkAll" /></th>
+                    <th>직번</th>
+                    <th>이름</th>
+                    <th>부서</th>
+                    <th>직급</th>
+                  </tr>
+                </thead>
+                <tbody id="empTbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /근로자 패널 -->
+        </div>
+      </section>
+
+      <!-- ===== 작업관리 ===== -->
+      <section id="page-work" class="page">
+        <div class="card">
+          <h3>작업관리</h3>
+          <p class="muted" style="margin:8px 0 12px">작업/공정, 허가서 등을 관리합니다.</p>
+          <div class="work-list" id="workList">
+            <div class="work-item" data-work="TBM">1. TBM</div>
+            <div class="work-item" data-work="위험성평가">2. 위험성평가</div>
+            <div class="work-item" data-work="안전보건교육">3. 안전보건교육</div>
+            <div class="work-item" data-work="MSDS">4. MSDS</div>
+            <div class="work-item" data-work="작업표준서">5. 작업표준서</div>
+            <div class="work-item" data-work="외주업체 작업">6. 외주업체 작업</div>
+          </div>
+          <div class="note" id="workHint" style="margin-top:10px">항목을 클릭하면 새 창에서 첨부·열람 페이지가 열립니다.</div>
+        </div>
+      </section>
+
+      <!-- ===== 법령 ===== -->
+      <section id="page-law" class="page">
+        <div class="card">
+          <h3>법령 링크</h3>
+          <div class="law-list">
+            <a href="https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%A4%91%EB%8C%80%EC%9E%AC%ED%95%B4%EC%B2%98%EB%B2%8C%EB%B2%95" target="_blank" rel="noopener">1. 중대재해 처벌법</a>
+            <a href="https://www.law.go.kr/LSW//lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&eventGubun=060101&query=%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95#liBgcolor2" target="_blank" rel="noopener">2. 산업안전보건법</a>
+            <a href="https://law.go.kr/LSW//lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&eventGubun=060101&query=%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95+%EC%8B%9C%ED%96%89%EB%A0%B9#undefined" target="_blank" rel="noopener">3. 산업안전보건법 시행령</a>
+            <a href="https://law.go.kr/LSW//lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&eventGubun=060101&query=%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95+%EC%8B%9C%ED%96%89%EB%A0%B9#undefined" target="_blank" rel="noopener">4. 산업안전보건법 시행규칙</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 소통게시판 ===== -->
+      <section id="page-counsel" class="page">
+        <div class="card">
+          <h3>소통게시판</h3>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button id="toggleWriter" class="btn-sm">글작성</button>
+          </div>
+          <div class="section" style="margin-top:12px">
+            <div class="board-wrap">
+              <div class="board-form" id="boardForm" style="display:none">
+                <input id="postTitle" placeholder="제목" />
+                <textarea id="postBody" rows="4" placeholder="본문"></textarea>
+                <input id="postPw" type="password" placeholder="개인 비밀번호 (수정·삭제에 필요)" />
+                <button id="postCreate" class="btn-pri" style="width:120px">등록</button>
+              </div>
+
+              <div class="board-list" id="boardList">
+                <div class="board-row header"><div>제목</div><div>작성일</div><div style="text-align:right">동작</div></div>
+                <!-- rows here -->
+              </div>
+
+              <div id="boardDetail" class="card" style="display:none">
+                <h3 id="detailTitle">제목</h3>
+                <p id="detailMeta" class="muted" style="margin-top:4px">익명 · <span id="detailDate"></span></p>
+                <div id="detailBody" style="white-space:pre-wrap;margin-top:10px"></div>
+                <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px">
+                  <button id="btnEdit" class="btn-sm">수정</button>
+                  <button id="btnDelete" class="btn-danger btn-sm">삭제</button>
+                  <button id="btnBack" class="btn-sm">목록</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 기타 ===== -->
+      <section id="page-report" class="page"><div class="card"><h3>컨설팅 보고서</h3><p>보고서 업로드/다운로드.</p></div></section>
+
+      <!-- ===== 안전사고 통계 ===== -->
+      <section id="page-data" class="page">
+        <div class="card">
+          <h3>안전사고 통계</h3>
+          <p class="muted" style="margin:8px 0 12px">사고 데이터를 입력·열람합니다.</p>
+          <div class="table-wrap" style="margin-bottom:10px">
+            <table>
+              <thead>
+                <tr>
+                  <th>번호</th>
+                  <th>일시</th>
+                  <th>지역</th>
+                  <th>사업장</th>
+                  <th>사번</th>
+                  <th>이름</th>
+                  <th>재해 유형</th>
+                  <th>사고 내용</th>
+                  <th>조치 결과</th>
+                  <th>요양 기간</th>
+                  <th>증빙자료</th>
+                </tr>
+              </thead>
+              <tbody id="accBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card" style="margin-top:10px">
+            <h3 style="margin-top:0">신규 입력</h3>
+            <div class="emp-inputs">
+              <input id="accDate" placeholder="일시 (예: 2025-09-15 14:30)"/>
+              <input id="accRegion" placeholder="지역"/>
+              <input id="accBiz" placeholder="사업장"/>
+              <input id="accNo" placeholder="사번"/>
+              <input id="accName" placeholder="이름"/>
+              <input id="accType" placeholder="재해 유형"/>
+              <input id="accDesc" placeholder="사고 내용"/>
+              <input id="accAction" placeholder="조치 결과"/>
+              <input id="accDays" placeholder="요양 기간(일)"/>
+              <input id="accProof" type="file" accept=".pdf,.jpg,.png" multiple style="display:none"/>
+              <button id="accProofBtn" class="btn-sm">증빙자료</button>
+              <button id="accAdd" class="btn-pri">추가</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ===== 로그인 처리 =====
+    const L=document.getElementById('login-layer');
+    const A=document.getElementById('app');
+    const id=document.getElementById('id');
+    const pw=document.getElementById('pw');
+    const err=document.getElementById('err');
+    function showApp(){L.style.display='none';A.style.display='grid';}
+    function showLogin(){A.style.display='none';L.style.display='flex';id.value='';pw.value='';err.style.display='none';}
+    function doLogin(){ if(id.value.trim()==='poswel'&&pw.value==='poswel'){sessionStorage.setItem('signed','1');showApp();} else {err.style.display='block';} }
+    document.getElementById('login').addEventListener('click',doLogin);
+    [id,pw].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
+    if(sessionStorage.getItem('signed')==='1')showApp();
+    document.getElementById('btn-logout').addEventListener('click',()=>{sessionStorage.removeItem('signed');history.replaceState(null,'',location.pathname);showLogin();});
+
+    // ===== 라우터 =====
+    const pages={home:'page-home',biz:'page-biz',work:'page-work',law:'page-law',counsel:'page-counsel',report:'page-report',data:'page-data'};
+    function go(page){ Object.values(pages).forEach(id=>document.getElementById(id).classList.remove('active')); document.getElementById(pages[page]).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active'); window.location.hash=page; }
+    document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>go(n.dataset.page)));
+    window.addEventListener('load',()=>{ const h=location.hash.replace('#',''); go(pages[h]?h:'home'); });
+
+    // ===== 홈 화면 달력 =====
+    const calGrid=document.getElementById('cal-grid'); const calMonth=document.getElementById('cal-month');
+    function renderCalendar(d=new Date()){ if(!calGrid) return; calGrid.innerHTML=''; const y=d.getFullYear(), m=d.getMonth(); calMonth.textContent=`${y}년 ${m+1}월`; const first=new Date(y,m,1), last=new Date(y,m+1,0); const offset=first.getDay(); for(let i=0;i<offset;i++){const c=document.createElement('div'); calGrid.appendChild(c);} for(let day=1; day<=last.getDate(); day++){ const cell=document.createElement('div'); cell.textContent=day; const today=new Date(); if(day===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()) cell.classList.add('today'); calGrid.appendChild(cell);} }
+    renderCalendar();
+    const todayBtn=document.getElementById('btn-today'); const addBtn=document.getElementById('btn-add');
+    if(todayBtn) todayBtn.addEventListener('click',()=>renderCalendar(new Date()));
+    if(addBtn) addBtn.addEventListener('click',()=>alert('일정 등록 폼은 추후 연결'));
+
+    // ===== 근로자 관리(사업장 관리 내) =====
+    const openEmpPanel=document.getElementById('openEmpPanel');
+    const empPanel=document.getElementById('empPanel');
+    const empTbody=document.getElementById('empTbody');
+    const addEmpBtn=document.getElementById('addEmpBtn');
+    const selDeleteBtn=document.getElementById('selDeleteBtn');
+    const checkAll=document.getElementById('checkAll');
+
+    // 저장 키 (관리자=poswel 전용). 기존 'employees' 키를 쓰던 데이터가 있으면 마이그레이션
+    const EMP_KEY = 'employees_poswel';
+    (function migrateEmployees(){
+      try{
+        const old = localStorage.getItem('employees');
+        if(old && !localStorage.getItem(EMP_KEY)){
+          localStorage.setItem(EMP_KEY, old);
+        }
+      }catch(e){}
+    })();
+
+    function getEmployees(){
+      try { return JSON.parse(localStorage.getItem(EMP_KEY)||'[]'); } catch(e){ return []; }
+    }
+    function setEmployees(list){ localStorage.setItem(EMP_KEY, JSON.stringify(list)); }
+
+    function renderEmp(){
+      const list = getEmployees();
+      empTbody.innerHTML = '';
+      list.forEach((emp, idx)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="checkbox" class="emp-check" data-index="${idx}"></td>
+          <td>${emp.no}</td>
+          <td>${emp.name}</td>
+          <td>${emp.dept}</td>
+          <td>${emp.rank}</td>`;
+        empTbody.appendChild(tr);
+      });
+      checkAll.checked=false;
+    }
+
+    // 패널 토글 (펼치기/접기) — 버튼 라벨은 항상 동일하게 유지
+    function togglePanel(){
+      const isHidden = empPanel.style.display==='none' || empPanel.style.display==='';
+      empPanel.style.display = isHidden ? 'block' : 'none';
+      if(isHidden) renderEmp();
+      openEmpPanel.textContent='부서 및 근로자 정보 보기 〉';
+    }
+    openEmpPanel.addEventListener('click', togglePanel);
+
+    // 입력검증 + 추가
+    addEmpBtn.addEventListener('click', ()=>{
+      const no=document.getElementById('empNo').value.trim();
+      const name=document.getElementById('empName').value.trim();
+      const dept=document.getElementById('empDept').value;
+      const rank=document.getElementById('empRank').value.trim();
+
+      if(!/^\d{6}$/.test(no)) { alert('직번은 6자리 숫자여야 합니다.'); return; }
+      if(name.length<2 || name.length>4) { alert('이름은 2~4글자여야 합니다.'); return; }
+      if(!dept) { alert('부서를 선택하세요.'); return; }
+      if(!/^[가-힣]+$/.test(rank)) { alert('정확한 정보를 입력해주세요'); return; }
+
+      const list=getEmployees();
+      list.push({no,name,dept,rank});
+      setEmployees(list);
+      ['empNo','empName','empRank'].forEach(i=>document.getElementById(i).value='');
+      document.getElementById('empDept').value='';
+      renderEmp();
+    });
+
+    // 선택삭제 (체크된 항목만 삭제)
+    selDeleteBtn.addEventListener('click', ()=>{
+      const checks=[...document.querySelectorAll('.emp-check:checked')];
+      if(checks.length===0){ alert('삭제할 근로자를 선택하세요.'); return; }
+      if(!confirm('선택한 근로자를 삭제할까요?')) return;
+      const toDelIdx = new Set(checks.map(c=>parseInt(c.dataset.index)));
+      const list=getEmployees().filter((_,i)=>!toDelIdx.has(i));
+      setEmployees(list);
+      renderEmp();
+    });
+
+    // 전체 체크박스 동기화
+    checkAll.addEventListener('change', ()=>{
+      document.querySelectorAll('.emp-check').forEach(c=>c.checked = checkAll.checked);
+    });
+    empTbody.addEventListener('change', (e)=>{
+      if(e.target && e.target.classList.contains('emp-check')){
+        const boxes=[...document.querySelectorAll('.emp-check')];
+        checkAll.checked = boxes.length>0 && boxes.every(b=>b.checked);
+      }
+    });
+
+    // ===== 작업관리: 새 창(탭) 업로드/열람 뷰 =====
+    const workList = document.getElementById('workList');
+    function openWorkWindow(type){
+      const w = window.open('', '_blank');
+      if(!w){ alert('팝업이 차단되었습니다. 허용해 주세요.'); return; }
+      w.document.write(`<!DOCTYPE html><html lang=ko><head><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\"/><title>${type}</title>
+        <style>body{font-family: NanumGothic, 'Malgun Gothic', Arial, sans-serif; margin:0; background:#f6f7fb; color:#111827}
+        .wrap{max-width:960px;margin:24px auto;padding:16px}
+        .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+        .row{display:grid;gap:8px;margin:10px 0}
+        input,textarea{padding:10px;border:1px solid #e5e7eb;border-radius:8px}
+        .btn{padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#2f6ae0;color:#fff;cursor:pointer}
+        table{width:100%;border-collapse:collapse;margin-top:12px}
+        th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}
+        th{background:#f1f5f9}
+        </style></head><body>
+        <div class=wrap>
+          <h2 style=\"margin:0 0 12px\">${type} 문서 업로드/열람</h2>
+          <div class=card>
+            <div class=row>
+              <input id=fileInput type=file accept=\".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.png,.csv,.txt\" />
+              <button id=btnUpload class=btn>업로드</button>
+            </div>
+            <table><thead><tr><th>번호</th><th>파일명</th><th>업로드일시</th><th>보기</th></tr></thead><tbody id=listBody></tbody></table>
+          </div>
+        </div>
+        <script>
+          const TYPE = ${'"'}${'${type}'}${'"'};
+          const STORAGE_KEY = 'work_files_'+TYPE;
+          function getList(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){return []}}
+          function setList(v){localStorage.setItem(STORAGE_KEY, JSON.stringify(v))}
+          function z(n){return String(n).padStart(2,'0')}
+          function fmt(ts){const d=new Date(ts);return \`${'${'}d.getFullYear()}-${'${'}z(d.getMonth()+1)}-${'${'}z(d.getDate())} ${'${'}z(d.getHours())}:${'${'}z(d.getMinutes())}\`}
+          function render(){const tb=document.getElementById('listBody');tb.innerHTML='';getList().forEach((f,i)=>{const tr=document.createElement('tr');tr.innerHTML=\`<td>${'${'}i+1}</td><td>${'${'}f.name}</td><td>${'${'}fmt(f.ts)}</td><td><a href=\\\"${'${'}f.url}\\\" target=\\\"_blank\\\">열람</a></td>\`;tb.appendChild(tr)})}
+          document.getElementById('btnUpload').addEventListener('click',()=>{
+            const input=document.getElementById('fileInput');
+            const file=input.files&&input.files[0]; if(!file){alert('파일을 선택하세요.'); return}
+            const url=URL.createObjectURL(file);
+            const list=getList(); list.unshift({name:file.name, url, ts:Date.now()}); setList(list); render(); input.value='';
+          });
+          render();
+        <\/script></body></html>`);
+      w.document.close();
+    }
+    if(workList){
+      workList.addEventListener('click',(e)=>{
+        const item = e.target.closest('.work-item');
+        if(!item) return;
+        const name = item.getAttribute('data-work');
+        openWorkWindow(name);
+      });
+    }
+
+    // ===== 소통게시판 (익명·비밀번호) =====
+    const BOARD_KEY = 'anon_board_posts_v1';
+    const boardListEl = document.getElementById('boardList');
+    const postTitle = document.getElementById('postTitle');
+    const postBody = document.getElementById('postBody');
+    const postPw = document.getElementById('postPw');
+    const postCreate = document.getElementById('postCreate');
+    const detailBox = document.getElementById('boardDetail');
+    const dTitle = document.getElementById('detailTitle');
+    const dDate = document.getElementById('detailDate');
+    const dBody = document.getElementById('detailBody');
+    const btnEdit = document.getElementById('btnEdit');
+    const btnDelete = document.getElementById('btnDelete');
+    const btnBack = document.getElementById('btnBack');
+
+    function getPosts(){
+      try{ return JSON.parse(localStorage.getItem(BOARD_KEY)||'[]'); }catch(e){ return []; }
+    }
+    function setPosts(list){ localStorage.setItem(BOARD_KEY, JSON.stringify(list)); }
+
+    function fmtDate(ts){ const d=new Date(ts); const z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`; }
+
+    async function sha256Hex(str){
+      const enc = new TextEncoder();
+      const buf = await crypto.subtle.digest('SHA-256', enc.encode(str));
+      return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function renderBoard(){
+      const list = getPosts().sort((a,b)=>b.createdAt-a.createdAt);
+      // 헤더 다음 행부터 제거
+      [...boardListEl.querySelectorAll('.board-row:not(.header)')].forEach(n=>n.remove());
+      list.forEach(p=>{
+        const row = document.createElement('div');
+        row.className='board-row';
+        row.innerHTML = `<div>${p.title}</div><div>${fmtDate(p.createdAt)}</div><div class="board-actions"><button class="btn-sm" data-act="view" data-id="${p.id}">보기</button></div>`;
+        boardListEl.appendChild(row);
+      });
+      detailBox.style.display='none';
+    }
+
+    function viewPost(id){
+      const p = getPosts().find(x=>x.id===id);
+      if(!p) return;
+      dTitle.textContent = p.title;
+      dDate.textContent = fmtDate(p.createdAt);
+      dBody.textContent = p.body;
+      detailBox.dataset.id = id;
+      detailBox.style.display='block';
+      detailBox.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+
+    async function createPost(){
+      const title = postTitle.value.trim();
+      const body = postBody.value.trim();
+      const pw = postPw.value;
+      if(!title || !body || !pw){ alert('제목, 본문, 비밀번호를 모두 입력하세요.'); return; }
+      const hash = await sha256Hex(pw);
+      const list = getPosts();
+      const id = 'p'+Date.now();
+      list.push({id, title, body, pwHash: hash, createdAt: Date.now()});
+      setPosts(list);
+      postTitle.value = ''; postBody.value=''; postPw.value='';
+      renderBoard();
+    }
+
+    async function verifyAndEdit(){
+      const id = detailBox.dataset.id; if(!id) return;
+      const list = getPosts();
+      const ix = list.findIndex(p=>p.id===id); if(ix<0) return;
+      const inputPw = prompt('수정을 위해 비밀번호를 입력하세요.'); if(inputPw===null) return;
+      const ok = (await sha256Hex(inputPw)) === list[ix].pwHash;
+      if(!ok){ alert('비밀번호가 일치하지 않습니다.'); return; }
+      const newTitle = prompt('새 제목을 입력하세요.', list[ix].title) ?? list[ix].title;
+      const newBody = prompt('새 본문을 입력하세요.', list[ix].body) ?? list[ix].body;
+      list[ix].title = newTitle.trim();
+      list[ix].body = newBody.trim();
+      setPosts(list);
+      viewPost(id);
+      renderBoard();
+    }
+
+    async function verifyAndDelete(){
+      const id = detailBox.dataset.id; if(!id) return;
+      const list = getPosts();
+      const ix = list.findIndex(p=>p.id===id); if(ix<0) return;
+      const inputPw = prompt('삭제를 위해 비밀번호를 입력하세요.'); if(inputPw===null) return;
+      const ok = (await sha256Hex(inputPw)) === list[ix].pwHash;
+      if(!ok){ alert('비밀번호가 일치하지 않습니다.'); return; }
+      if(!confirm('정말 삭제하시겠습니까?')) return;
+      list.splice(ix,1);
+      setPosts(list);
+      detailBox.style.display='none';
+      renderBoard();
+    }
+
+    // 이벤트 바인딩
+    const toggleWriterBtn = document.getElementById('toggleWriter');
+    const boardForm = document.getElementById('boardForm');
+    if(toggleWriterBtn){
+      toggleWriterBtn.addEventListener('click',()=>{
+        const vis = boardForm.style.display==='none' || boardForm.style.display==='';
+        boardForm.style.display = vis ? 'block' : 'none';
+        toggleWriterBtn.textContent = vis ? '작성 창 닫기' : '글작성';
+      });
+    }
+    if(postCreate) postCreate.addEventListener('click', createPost);
+    if(boardListEl) boardListEl.addEventListener('click', e=>{
+      const btn = e.target.closest('button[data-act="view"]');
+      if(btn){ viewPost(btn.dataset.id); }
+    });
+    if(btnEdit) btnEdit.addEventListener('click', verifyAndEdit);
+    if(btnDelete) btnDelete.addEventListener('click', verifyAndDelete);
+    if(btnBack) btnBack.addEventListener('click', ()=>{ detailBox.style.display='none'; });
+
+    // 초기 렌더
+    renderBoard();
+
+    // ===== 안전사고 통계 =====
+    const ACC_KEY='accidents_v1';
+    function getAcc(){ try{return JSON.parse(localStorage.getItem(ACC_KEY)||'[]')}catch(e){return[]} }
+    function setAcc(v){ localStorage.setItem(ACC_KEY, JSON.stringify(v)) }
+    function renderAcc(){
+      const tb=document.getElementById('accBody'); if(!tb) return; tb.innerHTML='';
+      getAcc().map((r,i)=>({...r,idx:i+1})).forEach(row=>{
+        const tr=document.createElement('tr');
+        const filesHtml=(row.files||[]).map((f,j)=>`<a href="${f.url}" target="_blank">파일${j+1}</a>`).join(' ');
+        tr.innerHTML=`<td>${row.idx}</td><td>${row.date}</td><td>${row.region}</td><td>${row.biz}</td><td>${row.no}</td><td>${row.name}</td><td>${row.type}</td><td>${row.desc}</td><td>${row.action}</td><td>${row.days}</td><td>${filesHtml||'-'}</td>`;
+        tb.appendChild(tr);
+      })
+    }
+    const accAdd=document.getElementById('accAdd');
+    const accProofBtn=document.getElementById('accProofBtn');
+    const accProof=document.getElementById('accProof');
+    const pick=(id)=>document.getElementById(id).value.trim();
+    if(accProofBtn&&accProof){ accProofBtn.addEventListener('click',()=>accProof.click()); }
+    if(accAdd){
+      accAdd.addEventListener('click',()=>{
+        const date=pick('accDate'); const region=pick('accRegion'); const biz=pick('accBiz'); const no=pick('accNo'); const name=pick('accName'); const type=pick('accType'); const desc=pick('accDesc'); const action=pick('accAction'); const days=pick('accDays');
+        if(!date||!region||!biz||!no||!name||!type||!desc){ alert('필수 항목을 입력하세요.'); return; }
+        const files=[...accProof.files||[]].map(f=>({name:f.name,url:URL.createObjectURL(f)}));
+        const list=getAcc(); list.unshift({date,region,biz,no,name,type,desc,action,days,files}); setAcc(list);
+        ['accDate','accRegion','accBiz','accNo','accName','accType','accDesc','accAction','accDays'].forEach(i=>document.getElementById(i).value='');
+        accProof.value='';
+        renderAcc();
+      })
+    }
+    renderAcc();
+  </script>
+</body>
+</html>
