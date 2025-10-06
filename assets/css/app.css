@@ -73,7 +73,9 @@ a{color:inherit;text-decoration:none}
 
 /* ===== 사업장(Biz) ===== */
 .biz-header{position:relative;background:#e5e7eb;border-radius:16px;overflow:hidden;margin-bottom:14px}
-.biz-cover{height:140px;background:linear-gradient(120deg,#dbeafe,#f8fafc)}
+.biz-cover{
+  height:180px; /* 필요시 조절 */
+  background: url('../img/poswel-poster.png') center / cover no-repeat;
 .biz-row{display:flex;gap:16px;align-items:flex-end;position:relative;margin-top:-40px;padding:0 16px 16px}
 .biz-avatar{width:96px;height:96px;border-radius:12px;border:4px solid #fff;background:#cbd5e1;display:flex;align-items:center;justify-content:center;font-weight:700}
 .biz-title{flex:1}
